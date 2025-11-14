@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviza Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #00ffff;
+            --secondary: #ff00ff;
+            --accent: #ffff00;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --text: #ffffff;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Animasi Background Listrik */
+        .electric-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+            background-size: 400% 400%;
+            animation: electric 10s ease infinite;
+        }
+
+        @keyframes electric {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--darker);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #splash-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 20px var(--primary);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px var(--primary); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px var(--primary); }
+            100% { transform: scale(1); box-shadow: 0 0 20px var(--primary); }
+        }
+
+        #continue-btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--primary);
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 15px var(--primary); }
+            to { box-shadow: 0 0 25px var(--primary), 0 0 35px var(--secondary); }
+        }
+
+        #continue-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--primary), 0 0 30px var(--secondary);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(10, 10, 26, 0.8);
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        /* Toolbar Menu */
+        .toolbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .toolbar-btn {
+            background: rgba(10, 10, 26, 0.8);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .toolbar-btn:hover {
+            background: var(--primary);
+            color: var(--dark);
+            transform: scale(1.1);
+        }
+
+        .toolbar-menu {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: rgba(10, 10, 26, 0.9);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 150px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .toolbar-menu.active {
+            display: flex;
+        }
+
+        .toolbar-menu a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-menu a:hover {
+            background: var(--primary);
+            color: var(--dark);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(10, 10, 26, 0.7);
+            border-radius: 15px;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Payment Methods */
+        .payment-methods {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .payment-method {
+            background: rgba(5, 5, 16, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--secondary);
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        .payment-method:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .payment-method h3 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .payment-method img {
+            max-width: 150px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        /* Products */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background: rgba(5, 5, 16, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--accent);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 255, 0, 0.3);
+        }
+
+        .product-header {
+            padding: 15px;
+            background: rgba(255, 255, 0, 0.1);
+            border-bottom: 1px solid var(--accent);
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .product-details {
+            padding: 15px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .product-card.active .product-details {
+            max-height: 500px;
+        }
+
+        .product-details ul {
+            list-style-type: none;
+            margin-bottom: 15px;
+        }
+
+        .product-details li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .product-details li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .order-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease 0.2s;
+        }
+
+        .product-card.active .order-buttons {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-wa {
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: white;
+        }
+
+        .btn-tele {
+            background: linear-gradient(45deg, #0088cc, #005580);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Testimoni Section */
+        .testimoni-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn-testi {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-testi-wa {
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: white;
+        }
+
+        .btn-testi-tele {
+            background: linear-gradient(45deg, #0088cc, #005580);
+            color: white;
+        }
+
+        .btn-testi:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(5, 5, 16, 0.9);
+            border-top: 1px solid var(--primary);
+            margin-top: 40px;
+        }
+
+        .watermark {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .disclaimer {
+            font-size: 0.9rem;
+            color: var(--text);
+            opacity: 0.8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--darker);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px var(--primary);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-title {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimoni-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .toolbar {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animasi Background Listrik -->
+    <div class="electric-bg"></div>
+
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <img src="https://files.catbox.moe/vay2dn.jpg" alt="Reviza Store" id="splash-image">
+        <button id="continue-btn">LANJUTKAN</button>
+    </div>
+
+    <!-- Toolbar Menu -->
+    <div class="toolbar">
+        <button class="toolbar-btn" id="toolbar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="toolbar-menu" id="toolbar-menu">
+            <a href="https://www.tiktok.com/@revizahoshii00" target="_blank">
+                <i class="fab fa-tiktok"></i> TikTok
+            </a>
+            <a href="https://www.youtube.com/@revizasenpai" target="_blank">
+                <i class="fab fa-youtube"></i> YouTube
+            </a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <img src="https://files.catbox.moe/vay2dn.jpg" alt="Reviza Store" class="profile-img">
+        <h1>REVIZA STORE</h1>
+        <p class="subtitle">Ingin menanyakan produk lain? Bisa langsung chat admin</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Payment Methods -->
+        <section class="section">
+            <h2 class="section-title">Metode Pembayaran</h2>
+            <div class="payment-methods">
+                <div class="payment-method">
+                    <h3>DANA</h3>
+                    <p>08978595858</p>
+                    <p>A/N MUHAMMAD REVIZA FLORYAN</p>
+                </div>
+                <div class="payment-method">
+                    <h3>QRIS</h3>
+                    <p>All Payment</p>
+                    <img src="https://files.catbox.moe/lpuumi.jpg" alt="QRIS">
+                </div>
+            </div>
+        </section>
+
+        <!-- Products -->
+        <section class="section">
+            <h2 class="section-title">Produk Kami</h2>
+            <div class="products-grid" id="products-container">
+                <!-- Products will be inserted here by JavaScript -->
+            </div>
+        </section>
+        <!-- Testimoni -->
+        <section class="section">
+            <h2 class="section-title">Jangan lupa cek testimoni kami dengan klik button di bawah ini</h2>
+            <div class="testimoni-buttons">
+                <a href="https://whatsapp.com/channel/0029Vb6fYg44NVic9Emtgo0Q" target="_blank" class="btn-testi btn-testi-wa">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Testimoni
+                </a>
+                <a href="https://t.me/testilonely4you" target="_blank" class="btn-testi btn-testi-tele">
+                    <i class="fab fa-telegram"></i> Telegram Testimoni
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p class="watermark">REVIZASENPAI</p>
+        <p class="disclaimer">Semua transaksi aplikasi premium tidak menerima MC dan terima kasih sudah mempercayai store kami</p>
+    </footer>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="payment-close">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="modal-title">Metode Pembayaran</h2>
+            <div class="payment-methods">
+                <div class="payment-method">
+                    <h3>DANA</h3>
+                    <p>08978595858</p>
+                    <p>A/N MUHAMMAD REVIZA FLORYAN</p>
+                </div>
+                <div class="payment-method">
+                    <h3>QRIS</h3>
+                    <p>All Payment</p>
+                    <img src="https://files.catbox.moe/lpuumi.jpg" alt="QRIS">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Produk
+        const products = [
+            {
+                name: "ALIGHT MOTION",
+                price: 10000,
+                details: [
+                    "CLOUD 100GB",
+                    "INDUK LAYER ON",
+                    "UNLOCK ALL EFFECT",
+                    "ORIGINAL AND SAVE",
+                    "1 TAHUN LANGGANAN",
+                    "AKUN DARI SELLER",
+                    "EXPORT PRESET",
+                    "PAKAI PRESET 5MB+",
+                    "PRIVATE ACCOUNT"
+                ]
+            },
+            {
+                name: "CAPCUT",
+                price: 20000,
+                details: [
+                    "UNLOCK ALL EFFECT",
+                    "STANDARD MEMBER",
+                    "AKUN DARI SELLER",
+                    "PRIVATE ACCOUNT",
+                    "SAVE AND ORIGINAL",
+                    "1B LANGGANAN"
+                ]
+            },
+            {
+                name: "CANVA",
+                price: 5000,
+                details: [
+                    "1B LANGGANAN",
+                    "UNLOCK ALL FUTURE",
+                    "AKUN DARI SELLER",
+                    "PRIVATE ACCOUNT",
+                    "VIA INVITE"
+                ]
+            },
+            {
+                name: "CANVA",
+                price: 15000,
+                details: [
+                    "LIFETIME",
+                    "UNLOCK ALL FUTURE",
+                    "AKUN DARI SELLER",
+                    "PRIVATE ACCOUNT",
+                    "VIA INVITE"
+                ]
+            },
+            {
+                name: "CANVA OWNER",
+                price: 25000,
+                details: [
+                    "1B LANGGANAN",
+                    "INVITE 50 MEMBER",
+                    "BISA JUAL CANVA",
+                    "AKUN DARI SELLER",
+                    "PRIVATE ACCOUNT",
+                    "VIA INVITE"
+                ]
+            },
+            {
+                name: "YOUTUBE",
+                price: 10000,
+                details: [
+                    "1B LANGGANAN",
+                    "AKUN DARI SELLER",
+                    "HAPUS SEMUA IKLAN",
+                    "SAVE AND ORIGINAL",
+                    "BACKGROUND PLAY"
+                ]
+            },
+            {
+                name: "TUTOR AM",
+                price: 30000,
+                details: [
+                    "CREATE AM RP.0",
+                    "BEBAS BUAT AM GRATIS",
+                    "BISA JUAL TUTOR",
+                    "BISA BUAT AM SEPUASNYA",
+                    "BISA JUAL AM",
+                    "BISA BUAT PRIVATE/SHARING"
+                ]
+            },
+            {
+                name: "RESELLER APLIKASI",
+                price: 20000,
+                details: [
+                    "BISA OPEN STORE",
+                    "BISA JUAL BERBAGAI APK",
+                    "100% ORIGINAL",
+                    "BISA OPEN PARTNER STORE",
+                    "BISA JADI PENYEDIA STOCK"
+                ]
+            },
+            {
+                name: "PAKET FYP",
+                price: 15000,
+                details: [
+                    "10000 VIEW",
+                    "5000 LIKE"
+                ]
+            },
+            {
+                name: "PAKET FYP 2",
+                price: 10000,
+                details: [
+                    "5000 VIEW",
+                    "2000 LIKE"
+                ]
+            },
+            {
+                name: "PUSH MEMBER CH",
+                price: 10000,
+                details: [
+                    "100 MEMBER",
+                    "BERLAKU KELIPATAN",
+                    "ALL AMAN",
+                    "MEM AKTIF"
+                ]
+            },
+            {
+                name: "BSTATION",
+                price: 30000,
+                details: [
+                    "1B LANGGANAN",
+                    "AKUN DARI SELLER",
+                    "HAPUS SEMUA IKLAN",
+                    "BUKA SEMUA FITUR PRO",
+                    "AMAN DAN ORIGINAL",
+                    "PRIVATE ACCOUNT"
+                ]
+            },
+            {
+                name: "RW MLBB",
+                price: 15000,
+                details: [
+                    "APK RANK BOOSTER",
+                    "VPN VIP",
+                    "AKSES SERVER",
+                    "AKSES FILE RW"
+                ]
+            },
+            {
+                name: "PAENER PRIVATE TELEGRAM",
+                price: 15000,
+                details: [
+                    "ʙᴀsᴇ & sᴄʀɪᴘᴛ ʟᴇɴɢᴋᴀᴘ",
+                    "ᴍᴀᴛᴇʀɪ ᴘᴇᴍʙᴇʟᴀᴊᴀʀᴀɴ",
+                    "ᴛᴏᴏʟs & ᴜᴛɪʟɪᴛɪᴇs"
+                ]
+            },
+            {
+                name: "NOKOS INDO",
+                price: 10000,
+                details: [
+                    "NOMOR VIRTUAL SAVE",
+                    "ANTI KENON ASAL GA JADI SENDER"
+                ]
+            },
+            {
+                name: "MURID NOKOS",
+                price: 5000,
+                details: [
+                    "BISA JUAL NOKOS",
+                    "BISA OPEN MURID LAGI"
+                ]
+            },
+            {
+                name: "MURID SUNTIK",
+                price: 5000,
+                details: [
+                    "BISA OOEN SUNTIK SOSMED",
+                    "BISA OPEN MURID LAGI"
+                ]
+            },
+            {
+                name: "FILE BADAK",
+                price: 10000,
+                details: [
+                    "COCOK UNTUK BLAST",
+                    "COCOK UNTUK SEWA WA",
+                    "COCOK UNTUK NGEFILE",
+                    "COCOK UNTUK PUSH KONTAK"
+                ]
+            }
+        ];
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Splash Screen
+            const splashScreen = document.getElementById('splash-screen');
+            const continueBtn = document.getElementById('continue-btn');
+            
+            continueBtn.addEventListener('click', function() {
+                splashScreen.classList.add('hidden');
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                }, 1000);
+            });
+            
+            // Toolbar Menu
+            const toolbarToggle = document.getElementById('toolbar-toggle');
+            const toolbarMenu = document.getElementById('toolbar-menu');
+            
+            toolbarToggle.addEventListener('click', function() {
+                toolbarMenu.classList.toggle('active');
+            });
+            
+            // Close toolbar when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!toolbarToggle.contains(e.target) && !toolbarMenu.contains(e.target)) {
+                    toolbarMenu.classList.remove('active');
+                }
+            });
+            
+            // Render Products
+            const productsContainer = document.getElementById('products-container');
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                productCard.innerHTML = `
+                    <div class="product-header">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-price">Rp ${product.price.toLocaleString('id-ID')}</p>
+                    </div>
+                    <div class="product-details">
+                        <ul>
+                            ${product.details.map(detail => `<li>${detail}</li>`).join('')}
+                        </ul>
+                        <div class="order-buttons">
+                            <button class="btn btn-wa" onclick="orderProduct('${product.name}', 'whatsapp')">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                            <button class="btn btn-tele" onclick="orderProduct('${product.name}', 'telegram')">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                productCard.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('btn')) {
+                        this.classList.toggle('active');
+                    }
+                });
+                
+                productsContainer.appendChild(productCard);
+            });
+            
+            // Payment Modal
+            const paymentModal = document.getElementById('payment-modal');
+            const paymentClose = document.getElementById('payment-close');
+            
+            // Show payment modal when clicking on payment section
+            document.querySelector('.section:nth-child(1)').addEventListener('click', function() {
+                paymentModal.classList.add('active');
+            });
+            
+            paymentClose.addEventListener('click', function() {
+                paymentModal.classList.remove('active');
+            });
+            
+            // Close modal when clicking outside
+            paymentModal.addEventListener('click', function(e) {
+                if (e.target === paymentModal) {
+                    paymentModal.classList.remove('active');
+                }
+            });
+        });
+        
+        // Fungsi untuk order produk
+        function orderProduct(productName, platform) {
+            const message = `Halo, saya ingin order ${productName}`;
+            let url = '';
+            
+            if (platform === 'whatsapp') {
+                url = `https://wa.me/6283832000354?text=${encodeURIComponent(message)}`;
+            } else if (platform === 'telegram') {
+                url = `https://t.me/lonely4you22?text=${encodeURIComponent(message)}`;
+            }
+            
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
